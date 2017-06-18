@@ -1,4 +1,5 @@
 var express = require('express');
+var express = require('helmet');
 var app = express();
 var port = process.env.PORT || 8080;
 
@@ -7,27 +8,35 @@ var session = require('express-session');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-
+var helmet = require('helmet');
 
 var configDB = require('./config/database.js');
 mongoose.connect(configDB.url);
 
+app.use(helmet({
+	frameguard: {
+		action: 'deny'
+	}
+}))
+
 app.use(morgan('dev'));
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(session({secret: 'hey there!',
-                saveUninialized: true,
-                resave: true}));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(session({secret: 'anystringoftext',
+				 saveUninitialized: true,
+				 resave: true}));
+
 app.set('view engine', 'ejs');
 
 
-/*app.use('/', function(req,res){
- res.send('our first express program');
- console.log(req.cookies);
- console.log('***********');
- console.log(req.session);
- });*/
+// app.use('/', function(req, res){
+// 	res.send('Our First Express program!');
+// 	console.log(req.cookies);
+// 	console.log('================');
+// 	console.log(req.session);
+// });
 
 require('./app/routes.js')(app);
+
 app.listen(port);
-console.log('server running on port: ', port);
+console.log('Server running on port: ' + port);
